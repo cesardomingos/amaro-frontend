@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getApiInfo } from '../services/api';
-import { API_CONFIG } from '../config/api';
+// import { API_CONFIG } from '../config/api';
 import styles from './ApiStatus.module.css';
 
 const ApiStatus: React.FC = () => {
@@ -47,11 +47,11 @@ const ApiStatus: React.FC = () => {
                status === 'connected' ? 'API Conectada' :
                'Erro de Conexão'}
             </span>
-            {/* {message && (
+            {message && (
               <p className={styles.statusMessage}>
                 {message}
               </p>
-            )} */}
+            )}
           </div>
         </div>
         {/* <div className={styles.apiUrl}>

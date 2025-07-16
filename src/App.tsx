@@ -6,7 +6,6 @@ import ApiStatus from './components/ApiStatus';
 import styles from './App.module.css';
 
 function App() {
-  const [currentStep, setCurrentStep] = useState(1);
   const [hasFiles, setHasFiles] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isReadyForDownload, setIsReadyForDownload] = useState(false);
@@ -16,22 +15,18 @@ function App() {
   const handleFilesChange = (newFiles: File[]) => {
     if (newFiles.length > 0) {
       setHasFiles(true);
-      setCurrentStep(1); // Upload step ativo
     } else {
       setHasFiles(false);
-      setCurrentStep(1); // Reset to first step
     }
   };
 
   const handleProcessingStart = () => {
     setIsProcessing(true);
-    setCurrentStep(2); // Processing step ativo
   };
 
   const handleProcessingComplete = () => {
     setIsProcessing(false);
     setIsReadyForDownload(true);
-    setCurrentStep(3); // Download step ativo
   };
 
   const handleDownloadComplete = () => {
@@ -45,7 +40,6 @@ function App() {
   };
 
   const handleNewMission = () => {
-    setCurrentStep(1);
     setHasFiles(false);
     setIsProcessing(false);
     setIsReadyForDownload(false);

@@ -1,0 +1,115 @@
+<style>
+    body {
+      background-color: #0B1120;
+      font-family: 'Inter', sans-serif;
+      color: #F9FAFB;
+      padding: 2rem;
+    }
+  
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+      color: #00FFC2;
+    }
+  
+    .progress-bar {
+      height: 8px;
+      background: linear-gradient(to right, #00FFC2, #1A2E55);
+      border-radius: 5px;
+      margin: 1.5rem 0;
+      animation: progressGlow 2s infinite ease-in-out;
+    }
+  
+    @keyframes progressGlow {
+      0%, 100% { box-shadow: 0 0 5px #00FFC2; }
+      50% { box-shadow: 0 0 15px #00FFC2; }
+    }
+  
+    .upload-box {
+      border: 2px dashed #2CF6F0;
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      transition: box-shadow 0.3s ease-in-out;
+    }
+  
+    .upload-box:hover {
+      box-shadow: 0 0 15px #2CF6F0;
+    }
+  
+    .upload-icon {
+      font-size: 3rem;
+      color: #2CF6F0;
+      margin-bottom: 1rem;
+    }
+  
+    .button {
+      background-color: #2CF6F0;
+      color: #0B1120;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+  
+    .button:hover {
+      background-color: #F9FAFB;
+      color: #2CF6F0;
+    }
+  
+    .card-status {
+      background-color: #1A2E55;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #F9FAFB;
+    }
+  
+    .card-status.active {
+      border: 2px solid #2CF6F0;
+    }
+  
+    .footer-msg {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-top: 2rem;
+      color: #2CF6F0;
+      text-align: center;
+    }
+  </style>
+  
+  <div class="header">
+    <img src="logo-datanaut.png" alt="Datanaut Logo" width="40" />
+    DATANAUT
+  </div>
+  
+  <div class="progress-bar"></div>
+  
+  <div class="card-status active">
+    <div class="upload-icon">
+      ⬆
+    </div>
+    <div><strong>Upload de Arquivos</strong></div>
+    <small>Selecione até 8 PDFs para processar</small>
+  </div>
+  
+  <div class="upload-box">
+    <p class="upload-icon">📂</p>
+    <p><strong>Envie suas fichas financeiras</strong></p>
+    <p>Arraste e solte ou clique abaixo</p>
+    <button class="button">Selecionar Arquivos</button>
+  </div>
+  
+  <div class="footer-msg">
+    Missão iniciada. Aguarde o processamento dos dados com segurança e precisão.
+  </div>
+  

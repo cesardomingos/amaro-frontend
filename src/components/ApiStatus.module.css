@@ -1,0 +1,81 @@
+.container {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: rgba(26, 46, 85, 0.3);
+  border: 1px solid var(--datanaut-border);
+  color: var(--datanaut-text);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 25px -3px rgba(0, 255, 194, 0.1), 0 4px 6px -2px rgba(0, 255, 194, 0.05);
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statusContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.statusIndicator {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.statusIndicatorChecking {
+  background-color: #fbbf24;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.statusIndicatorConnected {
+  background-color: #22d3ee;
+}
+
+.statusIndicatorError {
+  background-color: #ef4444;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.statusInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.statusText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.statusMessage {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.apiUrl {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+} 

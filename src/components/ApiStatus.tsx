@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { healthCheck, getApiInfo } from '../services/api';
+import { getApiInfo } from '../services/api';
 import { API_CONFIG } from '../config/api';
+import styles from './ApiStatus.module.css';
 
 const ApiStatus: React.FC = () => {
   const [status, setStatus] = useState<'checking' | 'connected' | 'error'>('checking');
@@ -9,7 +10,6 @@ const ApiStatus: React.FC = () => {
   useEffect(() => {
     const checkApiStatus = async () => {
       try {
-        const health = await healthCheck();
         const info = await getApiInfo();
         
         setStatus('connected');
@@ -23,28 +23,41 @@ const ApiStatus: React.FC = () => {
     checkApiStatus();
   }, []);
 
+  const getStatusIndicatorClass = () => {
+    switch (status) {
+      case 'checking':
+        return styles.statusIndicatorChecking;
+      case 'connected':
+        return styles.statusIndicatorConnected;
+      case 'error':
+        return styles.statusIndicatorError;
+      default:
+        return '';
+    }
+  };
+
   return (
-    <div className="mb-4 p-3 rounded-lg border">
-      <div className="flex items-center space-x-2">
-        <div className={`w-3 h-3 rounded-full ${
-          status === 'checking' ? 'bg-yellow-400' :
-          status === 'connected' ? 'bg-green-400' :
-          'bg-red-400'
-        }`} />
-        <span className="text-sm font-medium">
-          {status === 'checking' ? 'Verificando API...' :
-           status === 'connected' ? 'API Conectada' :
-           'Erro de Conexão'}
-        </span>
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <div className={styles.statusContainer}>
+          <div className={`${styles.statusIndicator} ${getStatusIndicatorClass()}`} />
+          <div className={styles.statusInfo}>
+            <span className={styles.statusText}>
+              {status === 'checking' ? 'Verificando API...' :
+               status === 'connected' ? 'API Conectada' :
+               'Erro de Conexão'}
+            </span>
+            {/* {message && (
+              <p className={styles.statusMessage}>
+                {message}
+              </p>
+            )} */}
+          </div>
+        </div>
+        {/* <div className={styles.apiUrl}>
+          {API_CONFIG.BASE_URL}
+        </div> */}
       </div>
-      {message && (
-        <p className="text-xs text-gray-600 mt-1">
-          {message}
-        </p>
-      )}
-      <p className="text-xs text-gray-500 mt-1">
-        Base URL: {API_CONFIG.BASE_URL}
-      </p>
     </div>
   );
 };

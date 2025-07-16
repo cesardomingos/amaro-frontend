@@ -1,0 +1,90 @@
+/* Branding Datanaut - Cores da marca */
+:root {
+  --datanaut-bg: #0B1120;
+  --datanaut-text: #F9FAFB;
+  --datanaut-accent: #00FFC2;
+  --datanaut-accent-alt: #2CF6F0;
+  --datanaut-border: #1A2E55;
+  --datanaut-active: #1E90FF;
+  --datanaut-hover: #00e5c0;
+}
+
+/* Tema Datanaut */
+.datanautTheme {
+  background-color: var(--datanaut-bg);
+  color: var(--datanaut-text);
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.maxWidth4xl {
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+/* Animações suaves */
+.transitionAll {
+  transition: all 0.3s ease;
+}
+
+/* Scrollbar personalizada para tema Datanaut */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--datanaut-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--datanaut-accent);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--datanaut-hover);
+}
+
+/* Melhorias para inputs e botões */
+input, button, textarea, select {
+  font-family: inherit;
+}
+
+/* Foco melhorado para acessibilidade */
+*:focus {
+  outline: 2px solid var(--datanaut-accent);
+  outline-offset: 2px;
+}
+
+/* Animações de loading */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animatePulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Tipografia limpa */
+.techTitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.techText {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+} 

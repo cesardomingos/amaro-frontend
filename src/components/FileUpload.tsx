@@ -1,16 +1,73 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faFilePdf, 
+  faTimes, 
+  faRocket,
+  faCheck,
+  faExclamationTriangle,
+  faInfoCircle,
+  faDownload
+} from '@fortawesome/free-solid-svg-icons';
 import { processarPDFs } from '../services/api';
+import styles from './FileUpload.module.css';
 
-const FileUpload: React.FC = () => {
+interface FileUploadProps {
+  onFilesChange?: (files: File[]) => void;
+  onProcessingStart?: () => void;
+  onProcessingComplete?: () => void;
+  onDownloadComplete?: () => void;
+  isProcessing?: boolean;
+  isReadyForDownload?: boolean;
+  isCompleted?: boolean;
+  onNewMission?: () => void;
+}
+
+const FileUpload: React.FC<FileUploadProps> = ({ 
+  onFilesChange, 
+  onProcessingStart, 
+  onProcessingComplete,
+  onDownloadComplete,
+  isProcessing = false,
+  isReadyForDownload = false,
+  isCompleted = false,
+  onNewMission
+}) => {
   const [files, setFiles] = useState<File[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [localIsProcessing, setLocalIsProcessing] = useState(false);
+  const [localIsCompleted, setLocalIsCompleted] = useState(false);
+  const [downloadCompleted, setDownloadCompleted] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [processedBlob, setProcessedBlob] = useState<Blob | null>(null);
+
+  // Notificar mudanças nos arquivos
+  useEffect(() => {
+    if (onFilesChange) {
+      onFilesChange(files);
+    }
+  }, [files, onFilesChange]);
+
+  // Sincronizar estados externos
+  useEffect(() => {
+    setLocalIsProcessing(isProcessing);
+  }, [isProcessing]);
+
+  useEffect(() => {
+    setLocalIsCompleted(isCompleted);
+  }, [isCompleted]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const pdfFiles = acceptedFiles.filter(file => 
       file.type === 'application/pdf'
     );
+    
+    // Limitar a 8 arquivos
+    if (pdfFiles.length > 8) {
+      setMessage({ text: 'Máximo de 8 arquivos permitido', type: 'error' });
+      return;
+    }
+    
     setFiles(pdfFiles);
     setMessage(null);
   }, []);
@@ -20,7 +77,8 @@ const FileUpload: React.FC = () => {
     accept: {
       'application/pdf': ['.pdf']
     },
-    multiple: true
+    multiple: true,
+    maxFiles: 8
   });
 
   const handleProcess = async () => {
@@ -29,123 +87,239 @@ const FileUpload: React.FC = () => {
       return;
     }
 
-    setIsProcessing(true);
+    setLocalIsProcessing(true);
     setMessage(null);
+    
+    // Notificar início do processamento
+    if (onProcessingStart) {
+      onProcessingStart();
+    }
 
     try {
       const blob = await processarPDFs(files);
+      setProcessedBlob(blob);
       
-      // Criar link para download
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Cálculo.v15 - Poupança - Preenchido.xlsx';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
       setMessage({ 
-        text: `Processamento concluído! ${files.length} arquivo(s) processado(s).`, 
+        text: `Processamento concluído! ${files.length} arquivo(s) processado(s). Arquivo pronto para download.`, 
         type: 'success' 
       });
+      
+      // Notificar conclusão do processamento
+      if (onProcessingComplete) {
+        onProcessingComplete();
+      }
     } catch (err: any) {
       setMessage({ 
         text: err.response?.data?.detail || 'Erro ao processar arquivos', 
         type: 'error' 
       });
     } finally {
-      setIsProcessing(false);
+      setLocalIsProcessing(false);
     }
+  };
+
+  const handleDownload = () => {
+    if (!processedBlob) return;
+
+    // Criar link para download
+    const url = window.URL.createObjectURL(processedBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Cálculo.v15 - Poupança - Preenchido.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    // Marcar download como concluído
+    setDownloadCompleted(true);
+    setMessage({ 
+      text: 'Download concluído com sucesso!', 
+      type: 'success' 
+    });
+
+    // Notificar conclusão do download após um delay
+    setTimeout(() => {
+      if (onDownloadComplete) {
+        onDownloadComplete();
+      }
+    }, 1500);
   };
 
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
   };
 
+  const getMessageIcon = (type: string) => {
+    switch (type) {
+      case 'error':
+        return faExclamationTriangle;
+      case 'success':
+        return faCheck;
+      default:
+        return faInfoCircle;
+    }
+  };
+
+  // Card de missão concluída
+  if (localIsCompleted) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.missionComplete}>
+          <div className={styles.missionIcon}>
+            <FontAwesomeIcon icon={faRocket} />
+          </div>
+          <h2 className={styles.missionTitle}>
+            Missão Concluída, Comandante!
+          </h2>
+          <p className={styles.missionDescription}>
+            Seus arquivos foram processados com sucesso e o download foi realizado.
+          </p>
+          <button 
+            onClick={onNewMission}
+            className={styles.newMissionButton}
+          >
+            Nova Missão
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Card de download pronto
+  if (isReadyForDownload && processedBlob) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.downloadReady}>
+          <div className={styles.downloadIcon}>
+            <FontAwesomeIcon icon={faDownload} />
+          </div>
+          <h2 className={styles.downloadTitle}>
+            Arquivo Pronto para Download!
+          </h2>
+          <p className={styles.downloadDescription}>
+            O processamento foi concluído com sucesso. Clique no botão abaixo para baixar o arquivo Excel.
+          </p>
+          <button 
+            onClick={handleDownload}
+            className={styles.downloadButton}
+            disabled={downloadCompleted}
+          >
+            <FontAwesomeIcon icon={faDownload} />
+            {downloadCompleted ? 'Download Concluído!' : 'Baixar Arquivo Excel'}
+          </button>
+          {downloadCompleted && (
+            <div className={styles.downloadSuccess}>
+              <FontAwesomeIcon icon={faCheck} />
+              <span>Download realizado com sucesso!</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          Processador de Fichas Financeiras
+    <div className={styles.container}>
+      {/* Seção de Upload */}
+      <div className={styles.uploadSection}>
+        <h2 className={styles.title}>
+          Envio de Arquivos PDF
         </h2>
+        <p className={styles.subtitle}>
+          Selecione até 8 fichas financeiras em formato PDF para processar
+        </p>
 
         {/* Área de Upload */}
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragActive 
-              ? 'border-blue-500 bg-blue-50' 
-              : 'border-gray-300 hover:border-gray-400'
+          className={`${styles.uploadArea} ${
+            isDragActive ? styles.uploadAreaActive : ''
           }`}
         >
           <input {...getInputProps()} />
-          <div className="text-gray-600">
-            {isDragActive ? (
-              <p>Solte os arquivos PDF aqui...</p>
-            ) : (
-              <div>
-                <p className="text-lg mb-2">
-                  Arraste e solte arquivos PDF aqui, ou clique para selecionar
-                </p>
-                <p className="text-sm text-gray-500">
-                  Apenas arquivos PDF são aceitos
-                </p>
-              </div>
-            )}
+          <div className={styles.uploadContent}>
+            <div className={styles.uploadIcon}>
+              <FontAwesomeIcon icon={faFilePdf} />
+            </div>
+            <h3 className={styles.uploadTitle}>
+              Envie suas fichas financeiras
+            </h3>
+            <p className={styles.uploadDescription}>
+              Arraste e solte até 8 arquivos PDF ou clique para selecionar
+            </p>
+            <button className={styles.selectButton}>
+              Selecionar Arquivos
+            </button>
           </div>
         </div>
 
-        {/* Lista de Arquivos */}
-        {files.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-3">Arquivos Selecionados:</h3>
-            <div className="space-y-2">
-              {files.map((file, index) => (
-                <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded">
-                  <span className="text-sm">{file.name}</span>
-                  <button
-                    onClick={() => removeFile(index)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Remover
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Botão de Processamento */}
-        {files.length > 0 && (
-          <div className="mt-6">
-            <button
-              onClick={handleProcess}
-              disabled={isProcessing}
-              className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
-                isProcessing
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
-            >
-              {isProcessing ? 'Processando...' : 'Processar PDFs'}
-            </button>
-          </div>
-        )}
-
-        {/* Mensagens */}
-        {message && (
-          <div className={`mt-4 p-4 rounded ${
-            message.type === 'error' 
-              ? 'bg-red-100 border border-red-400 text-red-700'
-              : message.type === 'success'
-              ? 'bg-green-100 border border-green-400 text-green-700'
-              : 'bg-blue-100 border border-blue-400 text-blue-700'
-          }`}>
-            {message.text}
-          </div>
-        )}
+        {/* Status dos arquivos */}
+        <div className={styles.fileStatus}>
+          <p>
+            Arquivos enviados: {files.length}/8
+          </p>
+        </div>
       </div>
+
+      {/* Lista de Arquivos */}
+      {files.length > 0 && (
+        <div className={styles.filesSection}>
+          <h3 className={styles.filesTitle}>Arquivos Selecionados:</h3>
+          <div className={styles.filesList}>
+            {files.map((file, index) => (
+              <div key={index} className={styles.fileItem}>
+                <div className={styles.fileInfo}>
+                  <div className={styles.fileIcon}>
+                    <FontAwesomeIcon icon={faFilePdf} className={styles.fileIconText} />
+                  </div>
+                  <span className={styles.fileName}>{file.name}</span>
+                </div>
+                <button
+                  onClick={() => removeFile(index)}
+                  className={styles.removeButton}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Botão de Iniciar Processamento */}
+      {files.length > 0 && (
+        <div className={styles.processButton}>
+          <button
+            onClick={handleProcess}
+            disabled={localIsProcessing}
+            className={`${styles.processButtonContent} ${
+              localIsProcessing ? styles.processButtonDisabled : styles.processButtonEnabled
+            }`}
+          >
+            <span>{localIsProcessing ? 'Processando...' : 'Iniciar Processamento'}</span>
+            {!localIsProcessing && <span>→</span>}
+          </button>
+        </div>
+      )}
+
+      {/* Mensagens */}
+      {message && (
+        <div className={`${styles.message} ${
+          message.type === 'error' 
+            ? styles.messageError
+            : message.type === 'success'
+            ? styles.messageSuccess
+            : styles.messageInfo
+        }`}>
+          <div className={styles.messageContent}>
+            <span className={styles.messageIcon}>
+              <FontAwesomeIcon icon={getMessageIcon(message.type)} />
+            </span>
+            <span className={styles.messageText}>{message.text}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

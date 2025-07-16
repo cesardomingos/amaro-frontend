@@ -12,9 +12,13 @@
     "dev-backend": "cd ../backend && python -m uvicorn main:app --reload --port 8000"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-regular-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "axios": "^1.6.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "axios": "^1.6.0",
     "react-dropzone": "^14.2.3"
   },
   "devDependencies": {
